@@ -21,10 +21,17 @@ img_with_boxes = results.plot()
 # 5. Convert to PIL Image
 img_pil = Image.fromarray(img_with_boxes)
 
-# 6. Add class counts using PIL
-draw = ImageDraw.Draw(img_pil)
+# 6. Load background image
+background = Image.open("bccbd03b-a912-417e-ae18-7918fda5d67e.jpg").convert("RGB")
 
-# Optional: set font (in Streamlit might need fallback font)
+# Resize background to match detection image (optional)
+background = background.resize(img_pil.size)
+
+# 7. Paste detection result onto background with alpha mask if needed
+background.paste(img_pil, (0, 0), img_pil if img_pil.mode == 'RGBA' else None)
+
+# 8. Draw class counts on the combined image
+draw = ImageDraw.Draw(background)
 try:
     font = ImageFont.truetype("arial.ttf", 24)
 except:
@@ -36,10 +43,9 @@ for i, (class_id, count) in enumerate(counts.items()):
     label = f"{name}: {count}"
     draw.text((10, y_offset + i * 30), label, font=font, fill=(255, 0, 0))
 
-# 7. Save and show
-img_pil.save("output_dengan_nama_dan_count.jpg")
+# 9. Save and show
+background.save("output_with_background.jpg")
 
-# Show with matplotlib
-plt.imshow(img_pil)
+plt.imshow(background)
 plt.axis('off')
 plt.show()
