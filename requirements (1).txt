@@ -6,5 +6,4 @@ streamlit
 opencv-python-headless
 torch
 ultralytics
-libgl1
-ffmpeg
+matplotlib
