@@ -1,5 +1,4 @@
 from collections import Counter
-from matplotlib import pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
