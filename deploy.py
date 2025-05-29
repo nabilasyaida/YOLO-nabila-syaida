@@ -4,52 +4,51 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+import os
 
-model = YOLO("best.pt")
+st.title("YOLO Acne Detection")
 
+# Cek apakah model tersedia
+if not os.path.exists("best.pt"):
+    st.error("File best.pt tidak ditemukan!")
+else:
+    model = YOLO("best.pt")
 
-# 1. Load model
-model = YOLO("best.pt")
+    # Cek gambar
+    image_path = "WHITEHEADS DAN PUSTULE.jpg"
+    if not os.path.exists(image_path):
+        st.error(f"Gambar '{image_path}' tidak ditemukan.")
+    else:
+        results = model(image_path)[0]
 
-# 2. Predict image
-results = model("WHITEHEADS DAN PUSTULE.jpg")[0]
+        class_ids = results.boxes.cls.cpu().numpy()
+        class_names = results.names
+        counts = Counter(class_ids)
 
-# 3. Count classes
-class_ids = results.boxes.cls.cpu().numpy()
-class_names = results.names
-counts = Counter(class_ids)
+        img_with_boxes = results.plot()
+        img_pil = Image.fromarray(img_with_boxes)
 
-# 4. Get the image with bounding boxes
-img_with_boxes = results.plot()
+        bg_path = "bccbd03b-a912-417e-ae18-7918fda5d67e.jpg"
+        if not os.path.exists(bg_path):
+            st.warning(f"Background '{bg_path}' tidak ditemukan. Menampilkan hasil deteksi saja.")
+            background = img_pil
+        else:
+            background = Image.open(bg_path).convert("RGB")
+            background = background.resize(img_pil.size)
+            background.paste(img_pil, (0, 0), img_pil if img_pil.mode == 'RGBA' else None)
 
-# 5. Convert to PIL Image
-img_pil = Image.fromarray(img_with_boxes)
+        # Draw class count
+        draw = ImageDraw.Draw(background)
+        try:
+            font = ImageFont.truetype("arial.ttf", 24)
+        except:
+            font = ImageFont.load_default()
 
-# 6. Load background image
-background = Image.open("bccbd03b-a912-417e-ae18-7918fda5d67e.jpg").convert("RGB")
+        y_offset = 30
+        for i, (class_id, count) in enumerate(counts.items()):
+            name = class_names[int(class_id)]
+            label = f"{name}: {count}"
+            draw.text((10, y_offset + i * 30), label, font=font, fill=(255, 0, 0))
 
-# Resize background to match detection image (optional)
-background = background.resize(img_pil.size)
-
-# 7. Paste detection result onto background with alpha mask if needed
-background.paste(img_pil, (0, 0), img_pil if img_pil.mode == 'RGBA' else None)
-
-# 8. Draw class counts on the combined image
-draw = ImageDraw.Draw(background)
-try:
-    font = ImageFont.truetype("arial.ttf", 24)
-except:
-    font = ImageFont.load_default()
-
-y_offset = 30
-for i, (class_id, count) in enumerate(counts.items()):
-    name = class_names[int(class_id)]
-    label = f"{name}: {count}"
-    draw.text((10, y_offset + i * 30), label, font=font, fill=(255, 0, 0))
-
-# 9. Save and show
-background.save("output_with_background.jpg")
-
-plt.imshow(background)
-plt.axis('off')
-plt.show()
+        # Tampilkan hasil
+        st.image(background, caption="Hasil Deteksi dengan YOLOv8", use_column_width=True)
