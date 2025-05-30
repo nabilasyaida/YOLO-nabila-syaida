@@ -33,4 +33,4 @@ img_with_boxes = results.plot()
 img_pil = Image.fromarray(img_with_boxes)
 
 # Ganti background dengan gambar baru
-bg_path = "Pastel Pink Holographic Gradient Mouse Pad Backgrou_
+bg_path = "Pastel Pink Holographic Gradient Mouse Pad Background.png"
