@@ -1,5 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 from collections import Counter
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
