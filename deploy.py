@@ -1,4 +1,3 @@
-from ultralytics import YOLO
 import streamlit as st
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -51,4 +50,4 @@ else:
             draw.text((10, y_offset + i * 30), label, font=font, fill=(255, 0, 0))
 
         # Tampilkan hasil
-        st.image(background, caption="Hasil Deteksi dengan YOLOv8", use_column_width=True)
+        st.image(background, caption="Hasil Deteksi dengan YOLOv11", use_column_width=True)
