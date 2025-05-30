@@ -5,49 +5,32 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
 
+st.set_page_config(page_title="YOLO Acne Detection", layout="centered")
 st.title("YOLO Acne Detection")
 
-# Cek apakah model tersedia
-if not os.path.exists("best.pt"):
-    st.error("File best.pt tidak ditemukan!")
+# Load model
+model_path = "best.pt"
+if not os.path.exists(model_path):
+    st.error("Model 'best.pt' tidak ditemukan. Silakan pastikan file sudah tersedia.")
+    st.stop()
 else:
-    model = YOLO("best.pt")
+    model = YOLO(model_path)
 
-    # Cek gambar
-    image_path = "WHITEHEADS DAN PUSTULE.jpg"
-    if not os.path.exists(image_path):
-        st.error(f"Gambar '{image_path}' tidak ditemukan.")
-    else:
-        results = model(image_path)[0]
+# Cek gambar target
+image_path = "WHITEHEADS DAN PUSTULE.jpg"
+if not os.path.exists(image_path):
+    st.error(f"Gambar '{image_path}' tidak ditemukan.")
+    st.stop()
 
-        class_ids = results.boxes.cls.cpu().numpy()
-        class_names = results.names
-        counts = Counter(class_ids)
+# Deteksi
+results = model(image_path)[0]
+class_ids = results.boxes.cls.cpu().numpy()
+class_names = results.names
+counts = Counter(class_ids)
 
-        img_with_boxes = results.plot()
-        img_pil = Image.fromarray(img_with_boxes)
+# Gambar hasil deteksi
+img_with_boxes = results.plot()
+img_pil = Image.fromarray(img_with_boxes)
 
-        bg_path = "bccbd03b-a912-417e-ae18-7918fda5d67e.jpg"
-        if not os.path.exists(bg_path):
-            st.warning(f"Background '{bg_path}' tidak ditemukan. Menampilkan hasil deteksi saja.")
-            background = img_pil
-        else:
-            background = Image.open(bg_path).convert("RGB")
-            background = background.resize(img_pil.size)
-            background.paste(img_pil, (0, 0), img_pil if img_pil.mode == 'RGBA' else None)
-
-        # Draw class count
-        draw = ImageDraw.Draw(background)
-        try:
-            font = ImageFont.truetype("arial.ttf", 24)
-        except:
-            font = ImageFont.load_default()
-
-        y_offset = 30
-        for i, (class_id, count) in enumerate(counts.items()):
-            name = class_names[int(class_id)]
-            label = f"{name}: {count}"
-            draw.text((10, y_offset + i * 30), label, font=font, fill=(255, 0, 0))
-
-        # Tampilkan hasil
-        st.image(background, caption="Hasil Deteksi dengan YOLOv11", use_column_width=True)
+# Ganti background dengan gambar baru
+bg_path = "Pastel Pink Holographic Gradient Mouse Pad Backgrou_
